@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_gauche, point_initial: float, poitn_final: float,
-                                   nombre_de_pas: int, conditions_initiales: float, x=sym.symbols("x"),
-                                   t=sym.symbols("t")) -> (float, float, float):
+def resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_x, equation_reduite_ordre_1_v, point_initial: float, poitn_final: float,
+                                   nombre_de_pas: int, conditions_initiales: tuple, x=sym.symbols("x"),
+                                   t=sym.symbols("t"), v=sym.symbols("v")) -> (float, float, float):
     """
     Cette méthode utilise la méthode de résolution d'équation non-linéaire par relaxation.
     Pour être utilisé, l'équation doit être de la forme x = f(x) afin que l'algorithme ne travail
@@ -27,24 +27,24 @@ def resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_gauche, point_initia
     x : SymPy symbol
         variable de l'équation à résoudre
     """
-    x_0 = conditions_initiales
+    x_0, v_0 = conditions_initiales
     t_0 = point_initial
     longueur_de_pas = (poitn_final - point_initial) / nombre_de_pas
     ordre_d_erreur = -int(np.log10(longueur_de_pas**3))
     for step in range(0, nombre_de_pas):
-        k1 = longueur_de_pas * equation_reduite_ordre_1_gauche.evalf(ordre_d_erreur, {x: x_0, t: t_0}) / 2
-        k2 = longueur_de_pas * equation_reduite_ordre_1_gauche.evalf(ordre_d_erreur, {x: x_0 + k1, t: t_0 + longueur_de_pas / 2})
+        k1_v = longueur_de_pas * equation_reduite_ordre_1_v.evalf(ordre_d_erreur, {x: x_0, t: t_0, v: v_0}) / 2
+        k2_v = longueur_de_pas * equation_reduite_ordre_1_v.evalf(ordre_d_erreur, {x: x_0, t: t_0 + (longueur_de_pas / 2), v: v_0 + k1_v})
+        k1_x = longueur_de_pas * equation_reduite_ordre_1_x.evalf(ordre_d_erreur, {x: x_0, t: t_0, v: v_0}) / 2
+        k2_x = longueur_de_pas * equation_reduite_ordre_1_x.evalf(ordre_d_erreur, {x: x_0 + k1_x, t: t_0 + (longueur_de_pas / 2), v:v_0})
         t_0 += longueur_de_pas
-        x_0 += k2
-
-    erreur_x = 1*(10**(-ordre_d_erreur))
-    erreur_v = abs((equation_reduite_ordre_1_gauche.evalf(ordre_d_erreur, {x: x_0 + erreur_x, t: t_0}) -
-               equation_reduite_ordre_1_gauche.evalf(ordre_d_erreur, {x: x_0 - erreur_x, t: t_0}))/2)
-    return x_0, equation_reduite_ordre_1_gauche.evalf(ordre_d_erreur, {x: x_0, t: t_0}), erreur_x, erreur_v
+        x_0 += k2_x
+        v_0 += k2_v
+    erreur = 1*(10**(-ordre_d_erreur))
+    return x_0, v_0, erreur
 
 
-def afficher_x_ou_v_vs_t_runge_kutta(equation_reduite_ordre_1_gauche, plage: tuple, nombre_de_points: int, conditions_initiales: tuple,
-                         afficher_v=False, x=sym.symbols("x"),t=sym.symbols("t") ) -> None:
+def afficher_x_ou_v_vs_t_runge_kutta(equation_reduite_ordre_1_x, equation_reduite_ordre_1_v, plage: tuple, nombre_de_points: int, conditions_initiales: tuple,
+                         afficher = "x_vs_t", x=sym.symbols("x"),t=sym.symbols("t"), v=sym.symbols("v") ) -> None:
     """
     Cette méthode utilise la méthode de résolution d'équation non-linéaire par relaxation.
     Pour être utilisé, l'équation doit être de la forme x = f(x) afin que l'algorithme ne travail
@@ -70,46 +70,87 @@ def afficher_x_ou_v_vs_t_runge_kutta(equation_reduite_ordre_1_gauche, plage: tup
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     valeurs_de_t = np.linspace(debut, fin, nombre_de_points)
-    x_0, v_0 = conditions_initiales
-    t_0 = debut
-    if afficher_v:
-        valeurs_de_v = []
-        i = 0
-        for t in valeurs_de_t:
-            if i == 0:
-                valeurs_de_v.append(v_0)
-                i += 1
-            else:
-                x_0, v_0, erreur_x, erreur_v = resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_gauche, t_0, t, 5, 0, x, t)
-                valeurs_de_v.append(v_0)
-                t_0 = t
+    x_i, v_i = conditions_initiales
+    t_i = debut
+    valeurs_de_v = []
+    valeurs_de_x = []
+    i = 0
+    for temps in valeurs_de_t:
+        if i == 0:
+            valeurs_de_v.append(v_i)
+            valeurs_de_x.append(x_i)
+            i = 1
+        else:
+            x_i, v_i, erreur = resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_x, equation_reduite_ordre_1_v, t_i, temps, 10, (x_i, v_i), x, t, v)
+            valeurs_de_v.append(v_i)
+            valeurs_de_x.append(x_i)
+            t_i = temps
 
+    if afficher == "x_vs_t":
         ax.plot(valeurs_de_t, np.asarray(valeurs_de_v), color='blue', lw=2)
-        ax.set_title("Graphique illustrant les résultats de l'équation correspondante\n"
-             " aux intersections entre les fonctions de gauche et de droite de\n l'équation.")
-        ax.set_xlabel("Valeurs de x")
-        ax.set_ylabel("Valeurs de f(x) gauche et droite")
-    else:
-        valeurs_de_x = []
-        i = 0
-        for t in valeurs_de_t:
-            if i == 0:
-                valeurs_de_x.append(x_0)
-                i += 1
-            else:
-                x_0, v_0, erreur_x, erreur_v = resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_gauche, t_0, t, 5, 0, x, t)
-                valeurs_de_x.append(x_0)
-                t_0 = t
+        ax.set_title("Graphique illustrant la vitesse en fonction du temps")
+        ax.set_xlabel("Temps [s]")
+        ax.set_ylabel("Vitesse [m/s]")
 
+    elif afficher == "v_vs_t":
         ax.plot(valeurs_de_t, np.asarray(valeurs_de_x), color='blue', lw=2)
-        ax.set_title("Graphique illustrant les résultats de l'équation correspondante\n"
-             " aux intersections entre les fonctions de gauche et de droite de\n l'équation.")
-        ax.set_xlabel("Valeurs de x")
-        ax.set_ylabel("Valeurs de f(x) gauche et droite")
+        ax.set_title("Graphique illustrant la position en fonction du temps")
+        ax.set_xlabel("Temps [s]")
+        ax.set_ylabel("Position [m]")
+
+    elif afficher == "v_vs_x":
+        ax.plot(np.asarray(valeurs_de_x), np.asarray(valeurs_de_v), color='blue', lw=2)
+        ax.set_title("Graphique illustrant la vitesse en fonction de la position")
+        ax.set_xlabel("Position [m]")
+        ax.set_ylabel("Vitesse [m/s]")
 
     plt.grid()
     plt.show()
     plt.close(fig)
 
+
 if __name__ == "__main__":
-    print("WORK IN PROGRESS")
+    # Code pour la question a)
+    """
+    x = sym.symbols("x")
+    t = sym.symbols("t")
+    v = sym.symbols("v")
+    equation_v = -x
+    equation_x = v
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (1, 0))
+    """
+    # Code pour la question b)
+    """
+    x = sym.symbols("x")
+    t = sym.symbols("t")
+    v = sym.symbols("v")
+    equation_v = -x
+    equation_x = v
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (3, 0))
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (-2, 0))
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (0, 2))
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (0, -3))
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (2, 2))
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (-2, -2))
+    """
+    # Code pour la question c)
+    """
+    x = sym.symbols("x")
+    t = sym.symbols("t")
+    v = sym.symbols("v")
+    equation_v = -(x**3)
+    equation_x = v
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (1, 0))
+    """
+    # Code pour la question d)
+    """
+    x = sym.symbols("x")
+    t = sym.symbols("t")
+    v = sym.symbols("v")
+    equation_v = -(x**3)
+    equation_x = v
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (1, 0), "v_vs_x")
+    equation_v = -x
+    equation_x = v
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (1, 0))
+    """
