@@ -19,7 +19,7 @@ def Fg(positions: np.ndarray, masses: np.ndarray) -> np.ndarray:
     """
     Cette méthode sert à calculer les forces gravitationnel pour n masses à certaines positions.
 
-        $\Vec{F}_i &= -G \sum_{j \ne i}^{} m_i m_j \frac{\Vec{r}_i - \Vec{r}_j}{\abs{\Vec{r}_i - \Vec{r}_j}^3}$
+        F_i = -G sum_{i != j} ( (m_i*m_j) * (r_i - r_j)/|r_i - r_j|^3 )
 
     :param positions: Matrices nxk contenant les vecteurs de positions de longueur k des n masses. (np.ndarray)
     :param masses: Vecteurs de longueur k contenants les coordonnées x_i des n masses. (np.ndarray)
@@ -33,11 +33,11 @@ def Fg(positions: np.ndarray, masses: np.ndarray) -> np.ndarray:
     f_i: list = list()
     for i, position_i in enumerate(positions):
         masse_i = masses[i]
-        position_relative = -(positions - position_i)
-        constante_de_normalisation = np.linalg.norm(position_relative, axis=1)**3
-        constantes_de_masse = masse_i*masses
-        constante_de_poids = constantes_de_masse*(1/constante_de_normalisation)
-        constante_de_poids[constante_de_poids == np.inf] = 0   # on enleve les inf pour des 0
+        position_relative = -(positions - position_i)  # r_i - r_j
+        constante_de_normalisation = np.linalg.norm(position_relative, axis=1)**3  # 1/|r_i - r_j|^3
+        constantes_de_masse = masse_i*masses  # m_i*m_j
+        constante_de_poids = constantes_de_masse*(1/constante_de_normalisation)  # (m_i*m_j)/|r_i - r_j|^3
+        constante_de_poids[constante_de_poids == np.inf] = 0   # on remplace les inf pour des 0
 
         # on reshape la matrice avoir de pouvoir faire une multiplication element wise
         constante_de_poids = np.tile(constante_de_poids.reshape((1, 3)), (2, 1)).transpose()
