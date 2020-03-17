@@ -23,7 +23,8 @@ def Fg(positions: np.ndarray, masses: np.ndarray) -> np.ndarray:
 
     :param positions: Matrices nxk contenant les vecteurs de positions de longueur k des n masses. (np.ndarray)
     :param masses: Vecteurs de longueur k contenants les coordonnées x_i des n masses. (np.ndarray)
-    :return: Vecteur de longueur n contenant les forces (scalaire) appliqué sur les n masses. (np.ndarray)
+    :return: Matrices de vecteurs de longueur nxk contenant les forces appliqué sur les n masses dans les k directions.
+             (np.ndarray)
     """
     from util import constantes
 
@@ -42,7 +43,8 @@ def Fg(positions: np.ndarray, masses: np.ndarray) -> np.ndarray:
         # on reshape la matrice avoir de pouvoir faire une multiplication element wise
         constante_de_poids = np.tile(constante_de_poids.reshape((1, 3)), (2, 1)).transpose()
 
-        f_i.append(-constantes["G"]*np.sum(np.multiply(constante_de_poids, position_relative)))
+        matrice_a_summer = np.multiply(constante_de_poids, position_relative)
+        f_i.append(-constantes["G"]*np.sum(matrice_a_summer, axis=0))
     return np.array(f_i)
 
 
@@ -56,8 +58,10 @@ def resolution_probleme_trois_corps(masses: np.ndarray, **kwargs):
     r_points = list()  # (dr_i/dt) = v_i -> g
     v_points = list()  # (dv_i / dt) = (1/m_i)*F_i -> f
 
+    masses_tile = np.tile(masses.reshape((1, 3)), (2, 1)).transpose()
+
     # initialisation des fonctions à résoudre
-    f = lambda r: (1/masses)*Fg(r, masses)
+    f = lambda r: (1/masses_tile)*Fg(r, masses)
     g = lambda idx: v_points[idx]
 
     # initialisation au premier point à t_0
@@ -67,14 +71,14 @@ def resolution_probleme_trois_corps(masses: np.ndarray, **kwargs):
 
     # initialisation du deuxieme point à t_0 + h/2
     v_demi = v_0 + (h/2)*f(r_points[-1])
-    r_demi = r_0 + np.tile(((h/2)*g(0)).reshape((1, 3)), (2, 1)).transpose()
+    r_demi = r_0 + (h/2)*g(0)
     v_points.append(v_demi)
     r_points.append(r_demi)
 
     # résolution de l'équation différentielle avec saute mouton
     for i, t in enumerate(t_points[2:]):  # ici, l'index i est deja en retard de 2 sur l'index de t dans t_points
         v_i = v_points[i] + h*f(r_points[i+1])
-        r_i = r_points[i] + np.tile((h*g(i+1)).reshape((1, 3)), (2, 1)).transpose()
+        r_i = r_points[i] + h*g(i+1)
         v_points.append(v_i)
         r_points.append(r_i)
 
@@ -88,7 +92,8 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    R, T = resolution_probleme_trois_corps(donnee_probleme["m_i"], conditions_initiales=donnee_probleme["r_0"])
+    R, T = resolution_probleme_trois_corps(donnee_probleme["m_i"], conditions_initiales=donnee_probleme["r_0"],
+                                           bornes=[0, 1], resolution=100)
     print(R.shape)
     for i in range(3):
         ax.plot(xs=R[:, i, 0], ys=R[:, i, 1], zs=T, label=donnee_probleme["labels"][i])
