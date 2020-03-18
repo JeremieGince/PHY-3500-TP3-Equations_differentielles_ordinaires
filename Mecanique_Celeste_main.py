@@ -218,7 +218,6 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
                             titre: str = "animation_resolution_3_corps", labels=None,
                             min_frames: int = 750):
     plt.style.use('seaborn-pastel')
-
     fig = plt.figure()
     R, T = matrice_de_position, vecteur_temps
 
@@ -228,7 +227,6 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     ax = plt.axes(xlim=xlim, ylim=ylim)
 
     text_t = ax.text(xlim[0], ylim[1], f"t: {0}", horizontalalignment='right', verticalalignment='bottom')
-
     line_0, = ax.plot([], [], 'o', lw=3, label=labels[0])
     line_1, = ax.plot([], [], 'o', lw=3, label=labels[1])
     line_2, = ax.plot([], [], 'o', lw=3, label=labels[2])
@@ -258,7 +256,7 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     anim = FuncAnimation(fig, animate, init_func=init,
                          frames=hm_frames, interval=20, blit=True)
 
-    anim.save(f'{titre}.gif', writer='imagemagick')
+    anim.save(f'Simulations/{titre}.gif', writer='imagemagick')
     # plt.show()
 
 
