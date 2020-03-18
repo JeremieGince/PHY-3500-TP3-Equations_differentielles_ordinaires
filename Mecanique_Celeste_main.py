@@ -1,4 +1,8 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.animation import FuncAnimation
+
 
 donnee_problemes: dict = {
     "a": {
@@ -37,7 +41,82 @@ donnee_problemes: dict = {
             [1.587433767, 1.47221479],
             [-3.174867535, -2.94442961]
         ]),
-    }
+    },
+    "c1": {
+        "labels": ["A", "B", "C"],
+        "t": [0, 15],
+        "m_i": np.array([1, 1, 1]),
+        "r_0": np.array([
+            [3.3030197, -0.82771837],
+            [-3.3030197, 0.82771837],
+            [0.0, 0.0]
+        ]),
+        "v_0": np.array([
+            [1.587433767, 1.47221479],
+            [1.587433767, 1.47221479],
+            [-3.174867535, -2.94442961]
+        ])+1.0,
+    },
+    "c2": {
+        "labels": ["A", "B", "C"],
+        "t": [0, 10],
+        "m_i": np.array([1, 1, 1]),
+        "r_0": np.array([
+            [3.3030197, -0.82771837],
+            [-3.3030197, 0.82771837],
+            [0.0, 0.0]
+        ]),
+        "v_0": np.array([
+            [1.587433767+1.0, 1.47221479+1.0],
+            [1.587433767, 1.47221479],
+            [-3.174867535, -2.94442961]
+        ]),
+    },
+    "c3": {
+        "labels": ["A", "B", "C"],
+        "t": [0, 15],
+        "m_i": np.array([1, 1, 1]),
+        "r_0": np.array([
+            [3.3030197, -0.82771837],
+            [-3.3030197, 0.82771837],
+            [0.0, 0.0]
+        ]),
+        "v_0": np.array([
+            [1.587433767, 1.47221479],
+            [1.587433767 + 1.0, 1.47221479 + 1.0],
+            [-3.174867535, -2.94442961]
+        ]),
+    },
+    "c4": {
+        "labels": ["A", "B", "C"],
+        "t": [0, 15],
+        "m_i": np.array([1, 1, 1]),
+        "r_0": np.array([
+            [3.3030197, -0.82771837],
+            [-3.3030197, 0.82771837],
+            [0.0, 0.0]
+        ]),
+        "v_0": np.array([
+            [1.587433767, 1.47221479],
+            [1.587433767, 1.47221479],
+            [-3.174867535 + 1.0, -2.94442961 + 1.0]
+        ]),
+    },
+    "c5": {
+        "labels": ["A", "B", "C"],
+        "t": [0, 100],
+        "m_i": np.array([1, 1, 1]),
+        "r_0": np.array([
+            [1, 3],
+            [-2, -1],
+            [1, -1]
+        ]),
+        "v_0": np.array([
+            [1.587433767, 1.47221479],
+            [1.587433767, 1.47221479],
+            [-3.174867535, -2.94442961]
+        ]),
+    },
 }
 
 
@@ -132,11 +211,12 @@ def simulation_affichage_3D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     plt.legend()
     plt.grid()
     plt.savefig(f"{titre}.png", dpi=300)
-    plt.show()
+    # plt.show()
 
 
 def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.ndarray,
-                            titre: str = "animation_resolution_3_corps", labels=None):
+                            titre: str = "animation_resolution_3_corps", labels=None,
+                            min_frames: int = 750):
     plt.style.use('seaborn-pastel')
 
     fig = plt.figure()
@@ -158,7 +238,7 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     plt.legend()
     plt.grid()
 
-    hm_frames: int = min(len(T), 750)
+    hm_frames: int = min(len(T), min_frames)
 
     def init():
         text_t.set_text(f"t: {0}")
@@ -179,18 +259,26 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
                          frames=hm_frames, interval=20, blit=True)
 
     anim.save(f'{titre}.gif', writer='imagemagick')
-    plt.show()
+    # plt.show()
 
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    from matplotlib.animation import FuncAnimation
 
     for probleme, donnees in donnee_problemes.items():
         R, T = resolution_probleme_trois_corps(donnees["m_i"],
                                                positions_initiales=donnees["r_0"],
                                                vitesses_initiales=donnees["v_0"],
-                                               bornes=donnees["t"], resolution=10_000)
+                                               bornes=donnees["t"], resolution=100_000)
         simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-        simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"])
+        simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
+                                min_frames=1_000)
+
+    # probleme = "c5"
+    # donnees = donnee_problemes[probleme]
+    # R, T = resolution_probleme_trois_corps(donnees["m_i"],
+    #                                        positions_initiales=donnees["r_0"],
+    #                                        vitesses_initiales=donnees["v_0"],
+    #                                        bornes=donnees["t"], resolution=100_000)
+    # simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
+    # simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
+    #                         min_frames=1_000)
