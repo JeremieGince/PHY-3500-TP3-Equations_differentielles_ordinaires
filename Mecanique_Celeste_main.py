@@ -205,18 +205,18 @@ def simulation_affichage_3D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     for i in range(3):
         ax.plot(xs=R[:, i, 0], ys=R[:, i, 1], zs=T, label=labels[i])
 
-    ax.set_xlabel('x [unité de distance]')
-    ax.set_ylabel('y [unité de distance]')
-    ax.set_zlabel('t [unité de temps]')
+    ax.set_xlabel('x [unité de distance]', fontsize=20)
+    ax.set_ylabel('y [unité de distance]', fontsize=20)
+    ax.set_zlabel('t [unité de temps]', fontsize=20)
     plt.legend()
     plt.grid()
-    plt.savefig(f"{titre}.png", dpi=300)
+    plt.savefig(f"Simulations/{titre}.png", dpi=300)
     # plt.show()
 
 
 def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.ndarray,
                             titre: str = "animation_resolution_3_corps", labels=None,
-                            min_frames: int = 750):
+                            min_frames: int = 750, echelle_temps: list = [0, 1]):
     plt.style.use('seaborn-pastel')
     fig = plt.figure()
     R, T = matrice_de_position, vecteur_temps
@@ -231,8 +231,8 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     line_1, = ax.plot([], [], 'o', lw=3, label=labels[1])
     line_2, = ax.plot([], [], 'o', lw=3, label=labels[2])
 
-    ax.set_xlabel('x [unité de distance]')
-    ax.set_ylabel('y [unité de distance]')
+    ax.set_xlabel('x [unité de distance]', fontsize=20)
+    ax.set_ylabel('y [unité de distance]', fontsize=20)
     plt.legend()
     plt.grid()
 
@@ -245,12 +245,21 @@ def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
         line_2.set_data([], [])
         return line_0, line_1, line_2, text_t,
 
-    def animate(i):
-        j: int = int(i * (len(T) / hm_frames))
-        text_t.set_text(f"t: {j / len(T):.2f} \n [temps \n normalisé]")
-        line_0.set_data(R[j, 0, 0], R[j, 0, 1])
-        line_1.set_data(R[j, 1, 0], R[j, 1, 1])
-        line_2.set_data(R[j, 2, 0], R[j, 2, 1])
+    def animate(frame_idx):
+        t_idx: int = int(frame_idx * (len(T) / hm_frames))
+        text_t.set_text(f"t: {(frame_idx / hm_frames) * echelle_temps[1] :.2f} [-]")
+        line_0.set_data(R[t_idx, 0, 0], R[t_idx, 0, 1])
+        line_1.set_data(R[t_idx, 1, 0], R[t_idx, 1, 1])
+        line_2.set_data(R[t_idx, 2, 0], R[t_idx, 2, 1])
+
+        if t_idx > 0:
+            xlim = (min([np.min(R[:t_idx, i, 0]) for i in range(3)])-1, max([np.max(R[:t_idx, i, 0]) for i in range(3)])+1)
+            ylim = (min([np.min(R[:t_idx, i, 1]) for i in range(3)])-1, max([np.max(R[:t_idx, i, 1]) for i in range(3)])+1)
+
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim)
+            text_t.set_position((xlim[0], ylim[1]))
+
         return line_0, line_1, line_2, text_t,
 
     anim = FuncAnimation(fig, animate, init_func=init,
@@ -269,9 +278,9 @@ if __name__ == '__main__':
                                                bornes=donnees["t"], resolution=100_000)
         simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
         simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
-                                min_frames=1_000)
+                                min_frames=200, echelle_temps=donnees["t"])
 
-    # probleme = "c5"
+    # probleme = "a"
     # donnees = donnee_problemes[probleme]
     # R, T = resolution_probleme_trois_corps(donnees["m_i"],
     #                                        positions_initiales=donnees["r_0"],
@@ -279,4 +288,4 @@ if __name__ == '__main__':
     #                                        bornes=donnees["t"], resolution=100_000)
     # simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
     # simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
-    #                         min_frames=1_000)
+    #                         min_frames=1_000, echelle_temps=donnees["t"])
