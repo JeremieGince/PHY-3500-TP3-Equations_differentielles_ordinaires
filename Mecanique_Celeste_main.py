@@ -120,10 +120,6 @@ donnee_problemes: dict = {
 }
 
 
-def delta_kroneckeur(i: int, j: int) -> int:
-    return int(i != j)
-
-
 def Fg(positions: np.ndarray, masses: np.ndarray) -> np.ndarray:
     """
     Cette méthode sert à calculer les forces gravitationnel pour n masses à certaines positions.
@@ -158,6 +154,17 @@ def Fg(positions: np.ndarray, masses: np.ndarray) -> np.ndarray:
 
 
 def resolution_probleme_trois_corps(masses: np.ndarray, **kwargs):
+    """
+    Cette fonction calcul la position de chacunes des masses en fonction du temps.
+    :param masses: Un vecteur de longueur 3 contenant les masses de chacun des corps. (np.ndarray)
+    :param kwargs: Autres arguments:
+                    :param bornes: une liste de longueur 2 contenant les bornes de temps du problème. (list)
+                    :param resolution: Le nombre de subdivision de temps. (int)
+                    :param position_initiales: matrice 3x2 des positions initiales xy de chancun des corps. (np.ndarray)
+                    :param vitesses_initiales: une matrice 3x2 contenant les vitesses de chacun des corps dans
+                    les directions xy. (np.ndarray)
+    :return: tuple(matrice des positions de chacun des corps au file du temps, vecteur des temps associé aux positions)
+    """
     [a, b] = kwargs.get("bornes", [0, 1])
     N = kwargs.get("resolution", 100)
     r_0 = kwargs.get("positions_initiales", np.zeros((3, 2)))
@@ -197,6 +204,14 @@ def resolution_probleme_trois_corps(masses: np.ndarray, **kwargs):
 
 def simulation_affichage_3D(matrice_de_position: np.ndarray, vecteur_temps: np.ndarray,
                             titre: str = "Simulation_affichage_3D", labels=None):
+    """
+    Affiche la solution du problème à 3 corps dans un graphique 3D.
+    :param matrice_de_position: La matrice des positions au file du temps. (np.ndarray)
+    :param vecteur_temps: Vecteur des temps associés aux positions des masses. (np.ndarray)
+    :param titre: Titre du graphique. (str)
+    :param labels: les noms associsé aux 3 masses. (list[nom0, nom1, nom2])
+    :return: None
+    """
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
@@ -214,9 +229,19 @@ def simulation_affichage_3D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     # plt.show()
 
 
-def simulaiton_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.ndarray,
+def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.ndarray,
                             titre: str = "animation_resolution_3_corps", labels=None,
                             min_frames: int = 750, echelle_temps: list = [0, 1]):
+    """
+    Construit l'animation de la résolution du problème à 3 corps.
+    :param matrice_de_position: La matrice des positions au file du temps. (np.ndarray)
+    :param vecteur_temps: Vecteur des temps associés aux positions des masses. (np.ndarray)
+    :param titre: Titre du graphique. (str)
+    :param labels: les noms associsé aux 3 masses. (list[nom0, nom1, nom2])
+    :param min_frames: Le nombre minimum d'images dans l'animation. (int)
+    :param echelle_temps: L'échelle de temps de la simulation. (list[temps initial, temps final])
+    :return: None
+    """
     plt.style.use('seaborn-pastel')
     fig = plt.figure()
     R, T = matrice_de_position, vecteur_temps
@@ -277,7 +302,7 @@ if __name__ == '__main__':
                                                vitesses_initiales=donnees["v_0"],
                                                bornes=donnees["t"], resolution=100_000)
         simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-        # simulaiton_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
+        # simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
         #                         min_frames=1_000, echelle_temps=donnees["t"])
 
     # probleme = "a"
@@ -287,5 +312,5 @@ if __name__ == '__main__':
     #                                        vitesses_initiales=donnees["v_0"],
     #                                        bornes=donnees["t"], resolution=100_000)
     # simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-    # simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
+    # simulation_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
     #                         min_frames=1_000, echelle_temps=donnees["t"])
