@@ -5,6 +5,9 @@ from matplotlib.animation import FuncAnimation
 
 
 donnee_problemes: dict = {
+    """
+    Données du problème 2 sous forme de dictionnaire.
+    """
     "a": {
         "labels": ["A", "B", "C"],
         "t": [0, 1],
