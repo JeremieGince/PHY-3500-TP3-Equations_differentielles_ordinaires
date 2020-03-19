@@ -203,11 +203,11 @@ def simulation_affichage_3D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     R, T = matrice_de_position, vecteur_temps
 
     for i in range(3):
-        ax.plot(xs=R[:, i, 0], ys=R[:, i, 1], zs=T, label=labels[i])
+        ax.plot(xs=R[:, i, 0], ys=R[:, i, 1], zs=T, label=labels[i], lw=2)
 
-    ax.set_xlabel('x [unité de distance]', fontsize=20)
-    ax.set_ylabel('y [unité de distance]', fontsize=20)
-    ax.set_zlabel('t [unité de temps]', fontsize=20)
+    ax.set_xlabel('x [unité de distance]', fontsize=18)
+    ax.set_ylabel('y [unité de distance]', fontsize=18)
+    ax.set_zlabel('t [unité de temps]', fontsize=16)
     plt.legend()
     plt.grid()
     plt.savefig(f"Simulations/{titre}.png", dpi=300)
@@ -276,9 +276,9 @@ if __name__ == '__main__':
                                                positions_initiales=donnees["r_0"],
                                                vitesses_initiales=donnees["v_0"],
                                                bornes=donnees["t"], resolution=100_000)
-        simulation_affichage_3D(R, T, titre=f"simulationAffichage3D-{probleme}", labels=donnees["labels"])
-        simulaiton_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
-                                min_frames=200, echelle_temps=donnees["t"])
+        simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
+        # simulaiton_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
+        #                         min_frames=1_000, echelle_temps=donnees["t"])
 
     # probleme = "a"
     # donnees = donnee_problemes[probleme]
