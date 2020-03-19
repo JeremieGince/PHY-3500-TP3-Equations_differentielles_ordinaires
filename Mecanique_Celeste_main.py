@@ -276,8 +276,8 @@ if __name__ == '__main__':
                                                positions_initiales=donnees["r_0"],
                                                vitesses_initiales=donnees["v_0"],
                                                bornes=donnees["t"], resolution=100_000)
-        simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-        simulaiton_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
+        simulation_affichage_3D(R, T, titre=f"simulationAffichage3D-{probleme}", labels=donnees["labels"])
+        simulaiton_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
                                 min_frames=200, echelle_temps=donnees["t"])
 
     # probleme = "a"
