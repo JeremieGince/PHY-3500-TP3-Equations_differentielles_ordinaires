@@ -267,6 +267,10 @@ def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     hm_frames: int = min(len(T), min_frames)
 
     def init():
+        """
+        Initialisation du graphique de l'animation.
+        :return: tuple des composants matplotlib à initialiser. :rtype tuple.
+        """
         text_t.set_text(f"t: {0}")
         line_0.set_data([], [])
         line_1.set_data([], [])
@@ -274,6 +278,12 @@ def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
         return line_0, line_1, line_2, text_t,
 
     def animate(frame_idx):
+        """
+        Fonction qui sert à mettre à jour le graphique dans l'animation.
+        Il met les nouvelles données pour l'image frame_idx de l'animation.
+        :param frame_idx: L'index de l'image courant. (int)
+        :return: tuple des composants matplotlib à mettre à jour. :rtype tuple.
+        """
         t_idx: int = int(frame_idx * (len(T) / hm_frames))
         text_t.set_text(f"t: {(frame_idx / hm_frames) * echelle_temps[1] :.2f} [-]")
         line_0.set_data(R[t_idx, 0, 0], R[t_idx, 0, 1])
