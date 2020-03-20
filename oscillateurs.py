@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import scipy.integrate as scint
 from mpl_toolkits import mplot3d
 
+
 def resolution_runge_kutta_ordre_2(equation_reduite_ordre_1_x, equation_reduite_ordre_1_v, point_initial: float, poitn_final: float,
                                    nombre_de_pas: int, conditions_initiales: tuple, x=sym.symbols("x"),
                                    t=sym.symbols("t"), v=sym.symbols("v")) -> (float, float, float):
@@ -342,7 +343,7 @@ if __name__ == "__main__":
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (3, 0), "v_vs_x")
     """
     # Code pour la question g)
-
+    """
     x = sym.symbols("x")
     t = sym.symbols("t")
     v = sym.symbols("v")
@@ -351,5 +352,5 @@ if __name__ == "__main__":
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (1, 0), "3d")
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (2, 0), "3d")
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (3, 0), "3d")
-
+    """
 
