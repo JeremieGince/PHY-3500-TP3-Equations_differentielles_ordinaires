@@ -4,10 +4,10 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 
 
-donnee_problemes: dict = {
-    """
+"""
     Données du problème 2 sous forme de dictionnaire.
-    """
+"""
+donnee_problemes: dict = {
     "a": {
         "labels": ["A", "B", "C"],
         "t": [0, 1],
@@ -309,21 +309,23 @@ def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
 
 if __name__ == '__main__':
 
-    for probleme, donnees in donnee_problemes.items():
-        R, T = resolution_probleme_trois_corps(donnees["m_i"],
-                                               positions_initiales=donnees["r_0"],
-                                               vitesses_initiales=donnees["v_0"],
-                                               bornes=donnees["t"], resolution=100_000)
-        simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-        simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
-                                min_frames=1_000, echelle_temps=donnees["t"])
+    # for probleme, donnees in donnee_problemes.items():
+    #     R, T = resolution_probleme_trois_corps(donnees["m_i"],
+    #                                            positions_initiales=donnees["r_0"],
+    #                                            vitesses_initiales=donnees["v_0"],
+    #                                            bornes=donnees["t"], resolution=100_000)
+    #     simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
+    #     simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
+    #                             min_frames=1_000, echelle_temps=donnees["t"])
 
-    # probleme = "a"
-    # donnees = donnee_problemes[probleme]
-    # R, T = resolution_probleme_trois_corps(donnees["m_i"],
-    #                                        positions_initiales=donnees["r_0"],
-    #                                        vitesses_initiales=donnees["v_0"],
-    #                                        bornes=donnees["t"], resolution=100_000)
-    # simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-    # simulation_animation_2D(R, T, titre=f"simulation_animation_2D_{probleme}", labels=donnees["labels"],
-    #                         min_frames=1_000, echelle_temps=donnees["t"])
+    probleme = "c5"
+    donnees = donnee_problemes[probleme]
+    R, T = resolution_probleme_trois_corps(donnees["m_i"],
+                                           positions_initiales=donnees["r_0"],
+                                           vitesses_initiales=donnees["v_0"],
+                                           bornes=donnees["t"], resolution=5_000_000)
+    simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
+    simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}-1000f", labels=donnees["labels"],
+                            min_frames=1_000, echelle_temps=donnees["t"])
+    simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}-200f", labels=donnees["labels"],
+                            min_frames=200, echelle_temps=donnees["t"])
