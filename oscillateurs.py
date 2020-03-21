@@ -2,6 +2,7 @@ import sympy as sym
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as scint
+import scipy.optimize as sciopt
 from mpl_toolkits import mplot3d
 
 
@@ -273,6 +274,65 @@ def afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_reduite_ordre_1_x, equation_
     plt.close(fig)
 
 
+def afficher_point_carree_scipy(equation_reduite_ordre_1_x, equation_reduite_ordre_1_v, plage: tuple, nombre_de_points: int, conditions_initiales: tuple
+                                , x=sym.symbols("x"), t=sym.symbols("t"), v=sym.symbols("v")) -> None:
+    """
+    Cette méthode appel la resolution_runge_kutta_ordre_2_scipy pour produire les points
+    pour produire le graphique des points carrées
+
+    Parameters
+    ----------
+    equation_reduite_ordre_1_x : SymPy object
+        fontion associé à dx/dt ex: dx/dt = v
+    equation_reduite_ordre_1_v : SymPy object
+        fontion associé à dv/dt ex: dv/dt =  -w^2x + sin(t)
+    plage :
+        plage d'affichage pour le graphique
+    nombre_de_points:
+        Nombre de points désirés pour produire le graphique
+    conditions_initiales:
+        tuple des conditions initiales pour
+        les deux variables dépendantes ex (x_0, v_0)
+    x : SymPy symbol
+        variable dépendante d'ordre 1
+    t : SymPy symbol
+        variable indépendante
+    v : SymPy symbol
+        variable dépendante d'ordre 2
+    """
+    debut, fin = plage
+    x_0, v_0 = conditions_initiales
+    t_0, t_f = plage
+
+    def fusion_deux_equations(temps, x_et_v):
+        valeur_x = x_et_v[0]
+        valeur_v = x_et_v[1]
+        fv = equation_reduite_ordre_1_v.evalf(9, {t: temps, x: valeur_x, v: valeur_v})
+        fx = equation_reduite_ordre_1_x.evalf(9, {t: temps, x: valeur_x, v: valeur_v})
+
+        return np.array([fx, fv], float)
+
+    y_0 = np.array([x_0, v_0], float)
+    roots_x = lambda temps, x_et_v: fusion_deux_equations(temps, x_et_v)[1]
+    solution = scint.solve_ivp(fusion_deux_equations, plage, y_0, method="RK45", dense_output=True, events=roots_x)
+    roots = solution.t_events[0]
+    periode = roots[5]-roots[3]
+    valeurs_t = []
+    for i in range(0,nombre_de_points):
+        valeurs_t.append(i*periode)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.scatter(solution.sol(valeurs_t)[0], solution.sol(valeurs_t)[1])
+    ax.set_title("Graphique point carrée de la vitesse en fonction du temps")
+    ax.set_xlabel("Position [m]")
+    ax.set_ylabel("Vitesse [m/s]")
+
+    plt.grid()
+    plt.show()
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     # Code pour la question a)
     """
@@ -281,33 +341,31 @@ if __name__ == "__main__":
     v = sym.symbols("v")
     equation_v = -x
     equation_x = v
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (1, 0))
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (1, 0))
     """
     # Code pour la question b)
     """
     x = sym.symbols("x")
-    t = sym.symbols("t")
     v = sym.symbols("v")
     equation_v = -x
     equation_x = v
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (3, 0), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (-2, 0), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (0, 2), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (0, -3), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (2, 2), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 101, (-2, -2),  frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (3, 0), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (-2, 0), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (0, 2), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (0, -3), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (2, 2), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0,50), 1001, (-2, -2),  frequence_comparative=1)
     """
     # Code pour la question c)
     """
     x = sym.symbols("x")
-    t = sym.symbols("t")
     v = sym.symbols("v")
     equation_v = -(x**3)
     equation_x = v
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 30), 101, (1, 0), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 15), 101, (2, 0), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 25), 101, (-1, 0), frequence_comparative=1)
-    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 10), 101, (-3, 0), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 30), 1001, (1, 0), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 15), 1001, (2, 0), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 25), 1001, (-1, 0), frequence_comparative=1)
+    afficher_x_ou_v_vs_t_runge_kutta(equation_x, equation_v, (0, 10), 1001, (-3, 0), frequence_comparative=1)
     """
     # Code pour la question d)
     """
@@ -328,8 +386,8 @@ if __name__ == "__main__":
     v = sym.symbols("v")
     equation_v = -x - (x**2 - 1)*v
     equation_x = v
-    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 101, (0.5, 0), "x_vs_t")
-    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 101, (0.5, 0), "v_vs_t")
+    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (0.5, 0), "x_vs_t")
+    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (0.5, 0), "v_vs_t")
     """
     # Code pour la question f)
     """
@@ -338,9 +396,9 @@ if __name__ == "__main__":
     v = sym.symbols("v")
     equation_v = -x - (x**2 - 1)*v
     equation_x = v
-    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (1, 0), "v_vs_x")
-    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (2, 0), "v_vs_x")
-    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (3, 0), "v_vs_x")
+    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 14*np.pi), 1001, (1, 0), "v_vs_x")
+    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 14*np.pi), 1001, (2, 0), "v_vs_x")
+    afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 14*np.pi), 1001, (3, 0), "v_vs_x")
     """
     # Code pour la question g)
     """
@@ -352,5 +410,5 @@ if __name__ == "__main__":
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (1, 0), "3d")
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (2, 0), "3d")
     afficher_x_ou_v_vs_t_runge_kutta_scipy(equation_x, equation_v, (0, 8*np.pi), 1001, (3, 0), "3d")
+    afficher_point_carree_scipy(equation_x, equation_v, (0, 1000), 50, (1, 0))
     """
-
