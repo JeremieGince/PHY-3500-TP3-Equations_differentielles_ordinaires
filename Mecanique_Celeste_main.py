@@ -339,14 +339,17 @@ def main(resolution=5_000_000):
 
     print(f"Construction du graphique 3D de la simulation ...")
     simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{input_probleme}", labels=donnees["labels"])
+    print(f"Construction du graphique 3D de la simulation - fini")
 
     print(f"Construction de la simulation 2D à 1 000 images ...")
     simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{input_probleme}-1000f", labels=donnees["labels"],
                             max_frames=1_000, echelle_temps=donnees["t"])
+    print(f"Construction de la simulation 2D à 1 000 images - fini")
 
     print(f"Construction de la simulation 2D à 200 images ...")
     simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{input_probleme}-200f", labels=donnees["labels"],
                             max_frames=200, echelle_temps=donnees["t"])
+    print(f"Construction de la simulation 2D à 200 images - fini")
 
 
 if __name__ == '__main__':
