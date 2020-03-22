@@ -357,5 +357,5 @@ if __name__ == '__main__':
 
     start = time.time()
     for p in donnee_problemes:
-        main(p_probleme=p)
+        main(resolution=5_000_000, p_probleme=p)
     print(f"\n --- Elapse time: {time.time()-start} --- \n")
