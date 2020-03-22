@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     for filename in os.listdir(directory):
         if filename.endswith(".gif"):
-            gif_to_png(filename, directory)
+            # gif_to_png(filename, directory)
             gif_to_mp4(filename, directory)
         else:
             continue
