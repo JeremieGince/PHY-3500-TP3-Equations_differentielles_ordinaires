@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 """
@@ -62,7 +65,7 @@ donnee_problemes: dict = {
     },
     "c2": {
         "labels": ["A", "B", "C"],
-        "t": [0, 10],
+        "t": [0, 15],
         "m_i": np.array([1, 1, 1]),
         "r_0": np.array([
             [3.3030197, -0.82771837],
@@ -107,7 +110,7 @@ donnee_problemes: dict = {
     },
     "c5": {
         "labels": ["A", "B", "C"],
-        "t": [0, 100],
+        "t": [0, 60],
         "m_i": np.array([1, 1, 1]),
         "r_0": np.array([
             [1, 3],
@@ -174,7 +177,7 @@ def resolution_probleme_trois_corps(masses: np.ndarray, **kwargs):
     v_0 = kwargs.get("vitesses_initiales", np.zeros((3, 2)))
 
     h = (b - a) / N
-    t_points = np.arange(a, b, h)
+    t_points = np.arange(a, b, h/2)
     r_points = list()  # (dr_i/dt) = v_i -> g
     v_points = list()  # (dv_i / dt) = (1/m_i)*F_i -> f
 
@@ -185,7 +188,6 @@ def resolution_probleme_trois_corps(masses: np.ndarray, **kwargs):
     g = lambda idx: v_points[idx]
 
     # initialisation au premier point à t_0
-    # v_0 = f(r_0)
     v_points.append(v_0)
     r_points.append(r_0)
 
@@ -234,18 +236,17 @@ def simulation_affichage_3D(matrice_de_position: np.ndarray, vecteur_temps: np.n
 
 def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.ndarray,
                             titre: str = "animation_resolution_3_corps", labels=None,
-                            min_frames: int = 750, echelle_temps: list = [0, 1]):
+                            max_frames: int = 750, echelle_temps: list = [0, 1]):
     """
     Construit l'animation de la résolution du problème à 3 corps.
     :param matrice_de_position: La matrice des positions au file du temps. (np.ndarray)
     :param vecteur_temps: Vecteur des temps associés aux positions des masses. (np.ndarray)
     :param titre: Titre du graphique. (str)
     :param labels: les noms associsé aux 3 masses. (list[nom0, nom1, nom2])
-    :param min_frames: Le nombre minimum d'images dans l'animation. (int)
+    :param max_frames: Le nombre minimum d'images dans l'animation. (int)
     :param echelle_temps: L'échelle de temps de la simulation. (list[temps initial, temps final])
     :return: None
     """
-    plt.style.use('seaborn-pastel')
     fig = plt.figure()
     R, T = matrice_de_position, vecteur_temps
 
@@ -264,7 +265,7 @@ def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     plt.legend()
     plt.grid()
 
-    hm_frames: int = min(len(T), min_frames)
+    hm_frames: int = min(len(T), max_frames)
 
     def init():
         """
@@ -307,25 +308,50 @@ def simulation_animation_2D(matrice_de_position: np.ndarray, vecteur_temps: np.n
     # plt.show()
 
 
+def save_data(nom_probleme, donnees_probleme):
+    np.save(f"Simulations/{nom_probleme}_data.npy", donnees_probleme)
+
+
+def load_data(nom_probleme):
+    import os
+    if os.path.exists(f"Simulations/{nom_probleme}_data.npy"):
+        donnes_probleme = np.load(f"Simulations/{nom_probleme}_data.npy")
+        R, T = donnes_probleme.item().get("R", None), donnes_probleme.item().get("T", None)
+        return R, T
+
+    else:
+        return None, None
+
+
+def main(resolution=5_000_000):
+    input_probleme = input("Entrez la simulation désirée: ")
+    assert input_probleme in donnee_problemes
+
+    donnees = donnee_problemes[input_probleme]
+    R, T = load_data(input_probleme)
+    if R is None or T is None:
+        print(f"Construction de la simulation ...")
+        R, T = resolution_probleme_trois_corps(donnees["m_i"],
+                                               positions_initiales=donnees["r_0"],
+                                               vitesses_initiales=donnees["v_0"],
+                                               bornes=donnees["t"], resolution=resolution)
+        save_data(input_probleme, {"R": R, "T": T})
+
+    print(f"Construction du graphique 3D de la simulation ...")
+    simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{input_probleme}", labels=donnees["labels"])
+
+    print(f"Construction de la simulation 2D à 1 000 images ...")
+    simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{input_probleme}-1000f", labels=donnees["labels"],
+                            max_frames=1_000, echelle_temps=donnees["t"])
+
+    print(f"Construction de la simulation 2D à 200 images ...")
+    simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{input_probleme}-200f", labels=donnees["labels"],
+                            max_frames=200, echelle_temps=donnees["t"])
+
+
 if __name__ == '__main__':
+    import time
 
-    # for probleme, donnees in donnee_problemes.items():
-    #     R, T = resolution_probleme_trois_corps(donnees["m_i"],
-    #                                            positions_initiales=donnees["r_0"],
-    #                                            vitesses_initiales=donnees["v_0"],
-    #                                            bornes=donnees["t"], resolution=100_000)
-    #     simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-    #     simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}", labels=donnees["labels"],
-    #                             min_frames=1_000, echelle_temps=donnees["t"])
-
-    probleme = "c5"
-    donnees = donnee_problemes[probleme]
-    R, T = resolution_probleme_trois_corps(donnees["m_i"],
-                                           positions_initiales=donnees["r_0"],
-                                           vitesses_initiales=donnees["v_0"],
-                                           bornes=donnees["t"], resolution=5_000_000)
-    simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{probleme}", labels=donnees["labels"])
-    simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}-1000f", labels=donnees["labels"],
-                            min_frames=1_000, echelle_temps=donnees["t"])
-    simulation_animation_2D(R, T, titre=f"simulationAnimation2D-{probleme}-200f", labels=donnees["labels"],
-                            min_frames=200, echelle_temps=donnees["t"])
+    start = time.time()
+    main()
+    print(f"\n --- Elapse time: {time.time()-start} --- \n")
