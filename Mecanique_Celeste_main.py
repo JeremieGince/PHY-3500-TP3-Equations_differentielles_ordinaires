@@ -323,8 +323,8 @@ def load_data(nom_probleme):
         return None, None
 
 
-def main(resolution=5_000_000):
-    input_probleme = input("Entrez la simulation désirée: ")
+def main(resolution=5_000_000, p_probleme: str = None):
+    input_probleme = input("Entrez la simulation désirée: ") if p_probleme is None else p_probleme
     assert input_probleme in donnee_problemes
 
     donnees = donnee_problemes[input_probleme]
@@ -356,5 +356,6 @@ if __name__ == '__main__':
     import time
 
     start = time.time()
-    main()
+    for p in donnee_problemes:
+        main(p_probleme=p)
     print(f"\n --- Elapse time: {time.time()-start} --- \n")
