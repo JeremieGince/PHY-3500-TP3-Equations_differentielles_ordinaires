@@ -318,7 +318,6 @@ def load_data(nom_probleme):
         donnes_probleme = np.load(f"Simulations/{nom_probleme}_data.npy")
         R, T = donnes_probleme.item().get("R", None), donnes_probleme.item().get("T", None)
         return R, T
-
     else:
         return None, None
 
@@ -336,6 +335,7 @@ def main(resolution=5_000_000, p_probleme: str = None):
                                                vitesses_initiales=donnees["v_0"],
                                                bornes=donnees["t"], resolution=resolution)
         save_data(input_probleme, {"R": R, "T": T})
+        print(f"Construction de la simulation - fini")
 
     print(f"Construction du graphique 3D de la simulation ...")
     simulation_affichage_3D(R, T, titre=f"simulation_affichage_3D_{input_probleme}", labels=donnees["labels"])
@@ -356,6 +356,5 @@ if __name__ == '__main__':
     import time
 
     start = time.time()
-    for p in donnee_problemes:
-        main(resolution=5_000_000, p_probleme=p)
+    main()
     print(f"\n --- Elapse time: {time.time()-start} --- \n")
